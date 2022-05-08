@@ -1,9 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const isProduction = process.env.NODE_ENV === 'production';
-
-const stylesHandler = 'style-loader';
 
 const config = {
   entry: './src/index.js',
@@ -18,16 +17,20 @@ const config = {
     new HtmlWebpackPlugin({
       template: 'index.html',
     }),
+    new MiniCssExtractPlugin(),
   ],
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/i,
+        test: /\.js$/,
         loader: 'babel-loader',
       },
       {
-        test: /\.css$/i,
-        use: [stylesHandler, 'css-loader'],
+        test: /\.css$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+        ],
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
