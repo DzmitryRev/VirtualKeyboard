@@ -324,6 +324,7 @@ export default class VirtualKeyboard {
     Array.from(this.keyElementsNodeList).forEach((key) => {
       key.addEventListener('mousedown', (e) => {
         e.preventDefault();
+        this.textareaElement.focus();
         Array.from(key.children).forEach((langSpan) => {
           if (!langSpan.classList.contains('hidden')) {
             const code = key.className.split(' ')[1];
