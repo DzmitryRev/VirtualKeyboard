@@ -210,6 +210,7 @@ export default class VirtualKeyboard {
   initEvents() {
     window.addEventListener('keydown', (e) => {
       e.preventDefault();
+      this.textareaElement.focus();
       if (e.code === 'CapsLock') {
         this.isCapsed = !this.isCapsed;
         e.target.removeEventListener('keydown', this.topw);
