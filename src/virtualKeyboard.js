@@ -135,6 +135,7 @@ export default class VirtualKeyboard {
     shiftEn,
     capsShiftEn,
   ) {
+    console.log(this.keys);
     const result = {
       code,
       rus: {
@@ -207,16 +208,11 @@ export default class VirtualKeyboard {
     this.toggleHidden(value, this.isCapsed ? 'capsShift' : 'shift', this.isCapsed ? 'caps' : 'standard');
   }
 
-  topw() {
-    this.isCapsed = !this.isCapsed;
-  }
-
   initEvents() {
     window.addEventListener('keydown', (e) => {
       e.preventDefault();
       if (e.code === 'CapsLock') {
-        console.log(e);
-        this.topw();
+        this.isCapsed = !this.isCapsed;
         e.target.removeEventListener('keydown', this.topw);
         return;
       }
