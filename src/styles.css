@@ -12,6 +12,22 @@ body {
     margin: 0 auto;
 }
 
+.title {
+    font-size: 30px;
+    color: rgba(101, 134, 177, 0.8);
+    -webkit-text-stroke: 1px rgba(114, 177, 101, 0.8);
+    -webkit-text-fill-color: rgba(101, 134, 177, 0.8);
+}
+
+.description,
+.language,
+.title {
+    margin: 10px auto;
+    text-align: center;
+}
+
+
+
 .keyboard {
     width: fit-content;
     margin: 0 auto;

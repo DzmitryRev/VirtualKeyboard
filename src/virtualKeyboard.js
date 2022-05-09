@@ -153,78 +153,85 @@ export default class VirtualKeyboard {
     return result;
   }
 
+  toggleHidden(value, classOne, classTwo) {
+    Array.from(this.keyElementsNodeList).forEach((item) => {
+      Array.from(item.children).forEach((langSpan) => {
+        Array.from(langSpan.children).forEach((span) => {
+          if (value) {
+            if (span.classList.contains(classOne)) {
+              span.classList.remove('hidden');
+            } else {
+              span.classList.add('hidden');
+            }
+          } else if (!value) {
+            if (span.classList.contains(classTwo)) {
+              span.classList.remove('hidden');
+            } else {
+              span.classList.add('hidden');
+            }
+          }
+        });
+      });
+    });
+  }
+
   changeLanguage() {
     Array.from(this.keyElementsNodeList).forEach((item) => {
       Array.from(item.children).forEach((langSpan) => {
-        if (!langSpan.classList.contains('hidden')) {
+        if (langSpan.classList.contains(this.selectedLanguage)) {
           langSpan.classList.add('hidden');
         } else {
           langSpan.classList.remove('hidden');
         }
       });
     });
+    if (this.selectedLanguage === 'eng') {
+      this.selectedLanguage = 'rus';
+      localStorage.setItem('language', 'rus');
+    } else if (this.selectedLanguage === 'rus') {
+      this.selectedLanguage = 'eng';
+      localStorage.setItem('language', 'eng');
+    }
   }
 
   caps(value) {
-    Array.from(this.keyElementsNodeList).forEach((item) => {
-      Array.from(item.children).forEach((langSpan) => {
-        Array.from(langSpan.children).forEach((span) => {
-          if (value) {
-            if (span.classList.contains('caps')) {
-              span.classList.remove('hidden');
-            } else {
-              span.classList.add('hidden');
-            }
-          } else if (span.classList.contains('standard')) {
-            span.classList.remove('hidden');
-          } else {
-            span.classList.add('hidden');
-          }
-        });
-      });
-    });
+    if (value) {
+      document.querySelector('.CapsLock').classList.add('active');
+    } else {
+      document.querySelector('.CapsLock').classList.remove('active');
+    }
+    this.toggleHidden(value, 'caps', 'standard');
   }
 
   shift(value) {
-    Array.from(this.keyElementsNodeList).forEach((item) => {
-      Array.from(item.children).forEach((langSpan) => {
-        Array.from(langSpan.children).forEach((span) => {
-          if (value) {
-            if (span.classList.contains(this.isCapsed ? 'capsShift' : 'shift')) {
-              span.classList.remove('hidden');
-            } else {
-              span.classList.add('hidden');
-            }
-          } else if (!value) {
-            if (span.classList.contains(this.isCapsed ? 'caps' : 'standard')) {
-              span.classList.remove('hidden');
-            } else {
-              span.classList.add('hidden');
-            }
-          }
-        });
-      });
-    });
+    this.toggleHidden(value, this.isCapsed ? 'capsShift' : 'shift', this.isCapsed ? 'caps' : 'standard');
+  }
+
+  topw() {
+    this.isCapsed = !this.isCapsed;
   }
 
   initEvents() {
     window.addEventListener('keydown', (e) => {
       e.preventDefault();
-      //   if (e.code === 'CapsLock') {
-      //     this.isCapsed = !this.isCapsed;
-      //     document.querySelector('.CapsLock').classList.toggle('active');
-      //   } else {
-      //     document.querySelector(`.${e.code}`).classList.remove('active');
-      //   }
-      if (e.code !== 'CapsLock') {
-        document.querySelector(`.${e.code}`).classList.add('active');
+      if (e.code === 'CapsLock') {
+        console.log(e);
+        this.topw();
+        e.target.removeEventListener('keydown', this.topw);
+        return;
       }
+
+      document.querySelector(`.${e.code}`).classList.add('active');
+
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         this.shift(true);
+        return;
       }
-      const el = document.getElementById('textarea');
-      let val = '';
-      const caret = el.selectionStart;
+
+      let keyValue = '';
+      const caret = this.textareaElement.selectionStart;
+      const oldValue = this.textareaElement.value.split('');
+
       // ON SYSTEM KEY (NO PRINT)
       if (e.code === 'CapsLock'
           || e.code === 'ShiftLeft'
@@ -245,8 +252,8 @@ export default class VirtualKeyboard {
           .filter((item, index) => index !== caret - 1)
           .join('');
 
-        el.selectionStart = caret - 1;
-        el.selectionEnd = caret - 1;
+        this.textareaElement.selectionStart = caret - 1;
+        this.textareaElement.selectionEnd = caret - 1;
         return;
       }
       // ON DELETE
@@ -256,38 +263,35 @@ export default class VirtualKeyboard {
           .filter((item, index) => index !== caret)
           .join('');
 
-        el.selectionStart = caret;
-        el.selectionEnd = caret;
+        this.textareaElement.selectionStart = caret;
+        this.textareaElement.selectionEnd = caret;
         return;
       }
       // ON TAB
       if (e.code === 'Tab') {
-        val = '    ';
-        const a = this.textareaElement.value.split('');
-        a.splice(caret, 0, val);
-        document.getElementById('textarea').value = a.join('');
-        el.selectionStart = caret + 4;
-        el.selectionEnd = caret + 4;
+        keyValue = '    ';
+        oldValue.splice(caret, 0, keyValue);
+        document.getElementById('textarea').value = oldValue.join('');
+        this.textareaElement.selectionStart = caret + 4;
+        this.textareaElement.selectionEnd = caret + 4;
         return;
       }
       // ON SPACE
       if (e.code === 'Space') {
-        val = ' ';
-        const a = this.textareaElement.value.split('');
-        a.splice(caret, 0, val);
-        document.getElementById('textarea').value = a.join('');
-        el.selectionStart = caret + 1;
-        el.selectionEnd = caret + 1;
+        keyValue = ' ';
+        oldValue.splice(caret, 0, keyValue);
+        this.textareaElement.value = oldValue.join('');
+        this.textareaElement.selectionStart = caret + 1;
+        this.textareaElement.selectionEnd = caret + 1;
         return;
       }
       // ON ENTER
       if (e.code === 'Enter') {
-        val = '\n';
-        const a = this.textareaElement.value.split('');
-        a.splice(caret, 0, val);
-        document.getElementById('textarea').value = a.join('');
-        el.selectionStart = caret + 1;
-        el.selectionEnd = caret + 1;
+        keyValue = '\n';
+        oldValue.splice(caret, 0, keyValue);
+        this.textareaElement.value = oldValue.join('');
+        this.textareaElement.selectionStart = caret + 1;
+        this.textareaElement.selectionEnd = caret + 1;
         return;
       }
       //   ON CHAR/SYMBOL
@@ -295,23 +299,19 @@ export default class VirtualKeyboard {
         if (!lang.classList.contains('hidden')) {
           Array.from(lang.children).forEach((span) => {
             if (!span.classList.contains('hidden')) {
-              val = span.innerText;
+              keyValue = span.innerText;
             }
           });
         }
       });
 
-      const a = this.textareaElement.value.split('');
-      a.splice(caret, 0, val);
-      document.getElementById('textarea').value = a.join('');
-      el.selectionStart = caret + 1;
-      el.selectionEnd = caret + 1;
+      oldValue.splice(caret, 0, keyValue);
+      this.textareaElement.value = oldValue.join('');
+      this.textareaElement.selectionStart = caret + 1;
+      this.textareaElement.selectionEnd = caret + 1;
     });
     window.addEventListener('keyup', (e) => {
-      if (e.code === 'CapsLock') {
-        this.isCapsed = !this.isCapsed;
-        document.querySelector('.CapsLock').classList.toggle('active');
-      } else {
+      if (e.code !== 'CapsLock') {
         document.querySelector(`.${e.code}`).classList.remove('active');
       }
       if (
@@ -324,13 +324,137 @@ export default class VirtualKeyboard {
         this.shift(false);
       }
     });
+    // MOUSE EVENTS
+    Array.from(this.keyElementsNodeList).forEach((key) => {
+      key.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        Array.from(key.children).forEach((langSpan) => {
+          if (!langSpan.classList.contains('hidden')) {
+            const code = key.className.split(' ')[1];
+
+            const [element] = Array.from(langSpan.children).filter((item) => !item.classList.contains('hidden'));
+
+            if (code === 'CapsLock') {
+              this.isCapsed = !this.isCapsed;
+              return;
+            }
+            document.querySelector(`.${code}`).classList.add('active');
+
+            if (code === 'ShiftLeft' || code === 'ShiftRight') {
+              this.shift(true);
+              return;
+            }
+
+            let keyValue = '';
+            const caret = this.textareaElement.selectionStart;
+
+            if (code === 'CapsLock'
+                  || code === 'ShiftLeft'
+                  || code === 'ShiftRight'
+                  || code === 'AltLeft'
+                  || code === 'AltRight'
+                  || code === 'ControlLeft'
+                  || code === 'ControlRight'
+                  || code === 'MetaLeft') {
+              return;
+            }
+            if (code === 'Backspace') {
+              if (caret === 0) return;
+
+              this.textareaElement.value = this.textareaElement.value
+                .split('')
+                .filter((item, index) => index !== caret - 1)
+                .join('');
+
+              this.textareaElement.selectionStart = caret - 1;
+              this.textareaElement.selectionEnd = caret - 1;
+              return;
+            }
+            if (code === 'Delete') {
+              this.textareaElement.value = this.textareaElement.value
+                .split('')
+                .filter((item, index) => index !== caret)
+                .join('');
+
+              this.textareaElement.selectionStart = caret;
+              this.textareaElement.selectionEnd = caret;
+              return;
+            }
+            if (code === 'Tab') {
+              keyValue = '    ';
+              const oldValue = this.textareaElement.value.split('');
+              oldValue.splice(caret, 0, keyValue);
+              this.textareaElement.value = oldValue.join('');
+              this.textareaElement.selectionStart = caret + 4;
+              this.textareaElement.selectionEnd = caret + 4;
+              return;
+            }
+            if (code === 'Space') {
+              keyValue = ' ';
+              const oldValue = this.textareaElement.value.split('');
+              oldValue.splice(caret, 0, keyValue);
+              this.textareaElement.value = oldValue.join('');
+              this.textareaElement.selectionStart = caret + 1;
+              this.textareaElement.selectionEnd = caret + 1;
+              return;
+            }
+            if (code === 'Enter') {
+              keyValue = '\n';
+              const oldValue = this.textareaElement.value.split('');
+              oldValue.splice(caret, 0, keyValue);
+              this.textareaElement.value = oldValue.join('');
+              this.textareaElement.selectionStart = caret + 1;
+              this.textareaElement.selectionEnd = caret + 1;
+              return;
+            }
+            keyValue = element.innerText;
+            const oldValue = this.textareaElement.value.split('');
+            oldValue.splice(caret, 0, keyValue);
+            this.textareaElement.value = oldValue.join('');
+            this.textareaElement.selectionStart = caret + 1;
+            this.textareaElement.selectionEnd = caret + 1;
+          }
+        });
+      });
+      document.addEventListener('mouseup', () => {
+        Array.from(key.children).forEach(() => {
+          const code = key.className.split(' ')[1];
+          if (code === 'ShiftLeft' || code === 'ShiftRight') {
+            this.shift(false);
+          }
+          if (code !== 'CapsLock') {
+            document.querySelector(`.${code}`).classList.remove('active');
+          }
+        });
+      });
+    });
   }
 
   init() {
+    // CHECK LOCAL STORAGE
+    if (localStorage.getItem('language')) {
+      this.selectedLanguage = localStorage.getItem('language');
+    } else {
+      this.selectedLanguage = 'eng';
+    }
+    // DEFINE ELEMENTS
     const wrapper = document.createElement('div');
+    const textarea = document.createElement('textarea');
+    textarea.classList.add('textarea');
+    textarea.id = 'textarea';
+    const title = document.createElement('p');
+    title.classList.add('title');
+    title.innerText = 'RSS Виртуальная клавиатура';
+    wrapper.insertAdjacentElement('beforeend', title);
+    const description = document.createElement('p');
+    description.classList.add('description');
+    description.innerText = 'Клавиатура создана в операционной системе Windows';
+    const language = document.createElement('p');
+    language.classList.add('language');
+    language.innerText = 'Для переключения языка комбинация: левыe ctrl + alt';
     const container = document.createElement('div');
-
     container.classList.add('keyboard');
+    // DEFINE KEYS
     this.keys.forEach((keyboardRow) => {
       const row = document.createElement('div');
       row.classList.add('row');
@@ -338,7 +462,7 @@ export default class VirtualKeyboard {
         const key = document.createElement('div');
         key.classList.add('key', keyboardKey.code);
         key.innerHTML = `
-                <span class="eng">
+                <span class="eng hidden">
                     <span class="standard">${keyboardKey.eng.standard}</span>
                     <span class="shift hidden">${keyboardKey.eng.shift}</span>
                     <span class="caps hidden">${keyboardKey.eng.caps}</span>
@@ -351,19 +475,26 @@ export default class VirtualKeyboard {
                     <span class="capsShift hidden">${keyboardKey.rus.capsShift}</span>
                 </span>
             `;
+        Array.from(key.children).forEach((item) => {
+          if (item.classList.contains(this.selectedLanguage)) {
+            item.classList.remove('hidden');
+            // localStorage.setItem('language', this.selectedLanguage);
+          }
+        });
         row.insertAdjacentElement('beforeend', key);
       });
       container.insertAdjacentElement('beforeend', row);
     });
-    const textarea = document.createElement('textarea');
-    textarea.classList.add('textarea');
-    textarea.id = 'textarea';
+    // INSERT ELEMENTS
     wrapper.insertAdjacentElement('beforeend', textarea);
     wrapper.insertAdjacentElement('beforeend', container);
+    wrapper.insertAdjacentElement('beforeend', description);
+    wrapper.insertAdjacentElement('beforeend', language);
     document.body.insertAdjacentElement('afterbegin', wrapper);
-
+    // SET ELEMENTS
     this.keyElementsNodeList = document.getElementsByClassName('key');
     this.textareaElement = textarea;
+    // INIT EVENTS
     this.initEvents();
   }
 }
