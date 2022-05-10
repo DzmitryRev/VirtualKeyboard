@@ -216,7 +216,9 @@ export default class VirtualKeyboard {
         return;
       }
 
-      document.querySelector(`.${e.code}`).classList.add('active');
+      const elem = document.querySelector(`.${e.code}`);
+      if (!elem) return;
+      elem.classList.add('active');
 
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         this.shift(true);
@@ -290,7 +292,7 @@ export default class VirtualKeyboard {
         return;
       }
       //   ON CHAR/SYMBOL
-      Array.from(document.querySelector(`.${e.code}`).children).forEach((lang) => {
+      Array.from(document.querySelector(`.${e.code}`)?.children).forEach((lang) => {
         if (!lang.classList.contains('hidden')) {
           Array.from(lang.children).forEach((span) => {
             if (!span.classList.contains('hidden')) {
