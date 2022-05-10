@@ -213,7 +213,6 @@ export default class VirtualKeyboard {
       this.textareaElement.focus();
       if (e.code === 'CapsLock') {
         this.isCapsed = !this.isCapsed;
-        e.target.removeEventListener('keydown', this.topw);
         return;
       }
 
@@ -308,7 +307,7 @@ export default class VirtualKeyboard {
     });
     window.addEventListener('keyup', (e) => {
       if (e.code !== 'CapsLock') {
-        document.querySelector(`.${e.code}`).classList.remove('active');
+        document.querySelector(`.${e.code}`)?.classList.remove('active');
       }
       if (
         ((e.code === 'AltLeft' || e.code === 'AltRight') && e.ctrlKey === true)
