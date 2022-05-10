@@ -437,27 +437,27 @@ export default class VirtualKeyboard {
     // DEFINE ELEMENTS
     const wrapper = document.createElement('div');
     const textarea = document.createElement('textarea');
-    textarea.classList.add('textarea');
+    textarea?.classList.add('textarea');
     textarea.id = 'textarea';
     const title = document.createElement('p');
-    title.classList.add('title');
+    title?.classList.add('title');
     title.innerText = 'RSS Виртуальная клавиатура';
     wrapper.insertAdjacentElement('beforeend', title);
     const description = document.createElement('p');
-    description.classList.add('description');
+    description?.classList.add('description');
     description.innerText = 'Клавиатура создана в операционной системе Windows';
     const language = document.createElement('p');
-    language.classList.add('language');
+    language?.classList.add('language');
     language.innerText = 'Для переключения языка комбинация: левыe ctrl + alt';
     const container = document.createElement('div');
-    container.classList.add('keyboard');
+    container?.classList.add('keyboard');
     // DEFINE KEYS
     this.keys.forEach((keyboardRow) => {
       const row = document.createElement('div');
-      row.classList.add('row');
+      row?.classList.add('row');
       keyboardRow.forEach((keyboardKey) => {
         const key = document.createElement('div');
-        key.classList.add('key', keyboardKey.code);
+        key?.classList.add('key', keyboardKey.code);
         key.innerHTML = `
                 <span class="eng hidden">
                     <span class="standard">${keyboardKey.eng.standard}</span>
